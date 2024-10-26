@@ -3,6 +3,8 @@
 #ifndef __JSON2DAISY_{{name|upper}}_H__
 #define __JSON2DAISY_{{name|upper}}_H__
 
+#include <array>
+
 {% if som == 'seed' %}
 #include "daisy_seed.h"
 #include "dev/codec_ak4556.h"
@@ -14,6 +16,12 @@
 {{display_conditional}}
 
 #define ANALOG_COUNT {{analogcount}}
+
+{% if CVOuts != '' %}
+static constexpr size_t cv_buf_len = 64;
+uint16_t DMA_BUFFER_MEM_SECTION cvout1[cv_buf_len];
+uint16_t DMA_BUFFER_MEM_SECTION cvout2[cv_buf_len];
+{% endif %}
 
 namespace json2daisy {
 
@@ -111,6 +119,7 @@ struct Daisy{{ name|capitalize }} {
     // DAC 
     {{ CVOuts }} 
     {% endif %}
+    
     {% if display != '' %}
 
     // Display
@@ -252,6 +261,14 @@ struct Daisy{{ name|capitalize }} {
     som.adc.Start();
     {% endif %}
     {% endif %}
+
+    {% for category, data in cmp_arr.items() %}
+    {{category}}s = {
+      {% for member in data.members %}
+      &{{member}},
+      {% endfor %}
+    };
+    {% endfor %}
   }
 
   /** Handles all the controls processing that needs to occur at the block rate
@@ -326,6 +343,17 @@ struct Daisy{{ name|capitalize }} {
     som.StartAudio(cb);
   }
 
+  {% if CVOuts != '' %}
+  inline void StartCV(daisy::DacHandle::DacCallback cb)
+  {
+    som.dac.Start(&cvout1[0], &cvout2[0], cv_buf_len, cb);
+  }
+
+  inline size_t CvOutSampleRate() {
+    return som.dac.GetConfig().target_samplerate;
+  }
+  {% endif %}
+
   /** This is the board's "System On Module" */
   {{som_class}} som;
   {% if som == 'seed' %}
@@ -336,6 +364,10 @@ struct Daisy{{ name|capitalize }} {
   {{comps}}
   {{dispdec}}
   {{midi}}
+
+  {% for category, data in cmp_arr.items() %}
+  std::array<{{data.typename}}*, {{data.members|length}}> {{category}}s;
+  {% endfor %}
 
 };
 
