@@ -352,6 +352,10 @@ struct Daisy{{ name|capitalize }} {
   inline size_t CvOutSampleRate() {
     return som.dac.GetConfig().target_samplerate;
   }
+
+  inline size_t CvOutCallbackRate() {
+    return som.dac.GetConfig().target_samplerate / cv_buf_len;
+  }
   {% endif %}
 
   /** This is the board's "System On Module" */
