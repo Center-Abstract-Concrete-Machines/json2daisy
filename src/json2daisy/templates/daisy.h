@@ -360,9 +360,7 @@ struct Daisy{{ name|capitalize }} {
 
   /** This is the board's "System On Module" */
   {{som_class}} som;
-  {% if som == 'seed' %}
   daisy::AdcChannelConfig cfg[ANALOG_COUNT];
-  {% endif %}
 
   // I/O Components
   {{comps}}

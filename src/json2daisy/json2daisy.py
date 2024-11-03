@@ -178,7 +178,7 @@ def generate_header(board_description_dict: dict) -> 'tuple[str, dict]':
         raise NameError(f'Unkown som "{som}"')
 
     # alphabetize by component name
-    components = sorted(components.items(), key=lambda x: x[1]['component'])
+    components = sorted(components.items(), key=lambda x: x[1]['component'] + x[0])
     components = list(map(map_load, components))
 
     # flatten pin dicts into multiple entries
